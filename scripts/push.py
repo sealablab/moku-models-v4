@@ -153,7 +153,8 @@ def main():
                         print(f"    ℹ Note: sample_rate is platform-dependent (not configurable)")
                 
                 # Configure waveform generator output (if specified)
-                if slot_config.waveform_output:
+                # Note: waveform_output is an optional extended field (not validated by Pydantic)
+                if hasattr(slot_config, 'waveform_output') and slot_config.waveform_output:
                     waveform_config = slot_config.waveform_output
                     try:
                         channel = waveform_config.get('channel', 1)

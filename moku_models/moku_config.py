@@ -8,7 +8,7 @@ This is the central Python abstraction for the entire project.
 """
 
 from typing import Any
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from moku_models.platforms.moku_go import MokuGoPlatform
 from moku_models.routing import MokuConnection
 
@@ -22,7 +22,17 @@ class SlotConfig(BaseModel):
         settings: Instrument-specific settings dictionary
         control_registers: Optional register values for CloudCompile slots
         bitstream: Optional bitstream path for CloudCompile slots
+
+    Extended Fields (optional, not validated):
+        waveform_output: Oscilloscope waveform generator configuration (dict)
+                        Used by push.py for configuring built-in signal generator
+
+    Note:
+        This model allows extra fields to support instrument-specific extensions
+        without complicating the core validation schema.
     """
+    model_config = ConfigDict(extra='allow')
+
     instrument: str = Field(..., description="Instrument type name")
     settings: dict[str, Any] = Field(default_factory=dict, description="Instrument-specific settings")
     control_registers: dict[int, int] | None = Field(default=None, description="Control register values (CloudCompile)")
