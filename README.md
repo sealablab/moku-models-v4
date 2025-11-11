@@ -96,8 +96,8 @@ config = MokuConfig(
         )
     },
     routing=[
-        MokuConnection(source='IN1', destination='Slot1InA'),
-        MokuConnection(source='Slot1OutA', destination='OUT1'),
+        MokuConnection(source='Input1', destination='Slot1InA'),
+        MokuConnection(source='Slot1OutA', destination='Output1'),
     ]
 )
 

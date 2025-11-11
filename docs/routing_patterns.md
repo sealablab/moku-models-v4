@@ -19,8 +19,8 @@ MCC routing connects:
 ## Port Naming Convention
 
 ### Physical Ports
-- **Inputs:** `IN1`, `IN2`, `IN3`, `IN4` (BNC input connectors)
-- **Outputs:** `OUT1`, `OUT2`, `OUT3`, `OUT4` (BNC output connectors)
+- **Inputs:** `Input1`, `Input2`, `Input3`, `Input4` (BNC input connectors)
+- **Outputs:** `Output1`, `Output2`, `Output3`, `Output4` (BNC output connectors)
 
 ### Slot Virtual Ports
 - **Inputs:** `Slot1InA`, `Slot1InB`, `Slot1InC`, `Slot1InD`
@@ -30,8 +30,8 @@ Replace `1` with slot number (1-4 depending on platform).
 
 **Example Mapping:**
 ```
-Physical IN1 → (MCC routing) → Slot2InA → CustomWrapper InputA (Slot 2)
-CustomWrapper OutputA (Slot 2) → Slot2OutA → (MCC routing) → Physical OUT1
+Physical Input1 → (MCC routing) → Slot2InA → CustomWrapper InputA (Slot 2)
+CustomWrapper OutputA (Slot 2) → Slot2OutA → (MCC routing) → Physical Output1
 ```
 
 ---
@@ -41,11 +41,11 @@ CustomWrapper OutputA (Slot 2) → Slot2OutA → (MCC routing) → Physical OUT1
 ### ✅ Allowed Connections
 
 1. **Physical Input → Slot Input(s)**
-   - Example: `IN1` → `Slot1InA`
+   - Example: `Input1` → `Slot1InA`
    - Fan-out allowed (one input to multiple slots)
 
 2. **Slot Output → Physical Output(s)**
-   - Example: `Slot1OutA` → `OUT1`
+   - Example: `Slot1OutA` → `Output1`
    - Fan-out allowed (one slot output to multiple physical outputs)
 
 3. **Slot Output → Other Slot Input(s)**
@@ -82,12 +82,12 @@ CustomWrapper OutputA (Slot 2) → Slot2OutA → (MCC routing) → Physical OUT1
 from moku_models import MokuConnection
 
 connections = [
-    MokuConnection(source='IN1', destination='Slot1InA'),
-    MokuConnection(source='Slot1OutA', destination='OUT1'),
+    MokuConnection(source='Input1', destination='Slot1InA'),
+    MokuConnection(source='Slot1OutA', destination='Output1'),
 ]
 ```
 
-**Signal flow:** Physical IN1 → Your module → Physical OUT1
+**Signal flow:** Physical Input1 → Your module → Physical Output1
 
 ---
 
@@ -97,8 +97,8 @@ connections = [
 
 ```python
 connections = [
-    MokuConnection(source='IN1', destination='Slot2InA'),      # External input
-    MokuConnection(source='Slot2OutA', destination='OUT1'),    # Physical output
+    MokuConnection(source='Input1', destination='Slot2InA'),      # External input
+    MokuConnection(source='Slot2OutA', destination='Output1'),    # Physical output
     MokuConnection(source='Slot2OutB', destination='Slot1InA'), # Monitor on Osc
 ]
 ```
@@ -108,8 +108,8 @@ connections = [
 - Slot 2: Custom instrument (your VHDL)
 
 **Signal flow:**
-- Physical IN1 → Custom instrument InputA
-- Custom instrument OutputA → Physical OUT1
+- Physical Input1 → Custom instrument InputA
+- Custom instrument OutputA → Physical Output1
 - Custom instrument OutputB → Oscilloscope Ch1 (for debugging)
 
 **Common usage:** Development and hardware validation
@@ -122,9 +122,9 @@ connections = [
 
 ```python
 connections = [
-    MokuConnection(source='IN1', destination='Slot1InA'),
+    MokuConnection(source='Input1', destination='Slot1InA'),
     MokuConnection(source='Slot1OutA', destination='Slot2InA'),  # Chain slots
-    MokuConnection(source='Slot2OutA', destination='OUT1'),
+    MokuConnection(source='Slot2OutA', destination='Output1'),
 ]
 ```
 
@@ -132,7 +132,7 @@ connections = [
 - Slot 1: First processing stage (e.g., filter)
 - Slot 2: Second processing stage (e.g., amplifier)
 
-**Signal flow:** Physical IN1 → Slot 1 → Slot 2 → Physical OUT1
+**Signal flow:** Physical Input1 → Slot 1 → Slot 2 → Physical Output1
 
 ---
 
@@ -142,10 +142,10 @@ connections = [
 
 ```python
 connections = [
-    MokuConnection(source='IN1', destination='Slot1InA'),      # Slot 1 gets input
-    MokuConnection(source='IN1', destination='Slot2InA'),      # Slot 2 gets same input
-    MokuConnection(source='Slot1OutA', destination='OUT1'),    # Slot 1 output
-    MokuConnection(source='Slot2OutA', destination='OUT2'),    # Slot 2 output
+    MokuConnection(source='Input1', destination='Slot1InA'),      # Slot 1 gets input
+    MokuConnection(source='Input1', destination='Slot2InA'),      # Slot 2 gets same input
+    MokuConnection(source='Slot1OutA', destination='Output1'),    # Slot 1 output
+    MokuConnection(source='Slot2OutA', destination='Output2'),    # Slot 2 output
 ]
 ```
 
@@ -159,10 +159,10 @@ connections = [
 
 ```python
 connections = [
-    MokuConnection(source='IN1', destination='Slot2InA'),       # Input to custom module
+    MokuConnection(source='Input1', destination='Slot2InA'),       # Input to custom module
     MokuConnection(source='Slot2OutA', destination='Slot1InA'), # OutA → Osc Ch1
     MokuConnection(source='Slot2OutB', destination='Slot1InB'), # OutB → Osc Ch2
-    MokuConnection(source='Slot2OutC', destination='OUT1'),     # OutC → Physical OUT1
+    MokuConnection(source='Slot2OutC', destination='Output1'),     # OutC → Physical Output1
 ]
 ```
 
@@ -182,12 +182,12 @@ connections = [
 
 ```python
 connections = [
-    MokuConnection(source='IN1', destination='Slot1InA'),
-    MokuConnection(source='Slot1OutA', destination='OUT1'),
+    MokuConnection(source='Input1', destination='Slot1InA'),
+    MokuConnection(source='Slot1OutA', destination='Output1'),
 ]
 ```
 
-**Physical setup:** Use BNC cable to connect OUT1 → IN2 externally
+**Physical setup:** Use BNC cable to connect Output1 → Input2 externally
 
 **Use case:** Testing feedback algorithms (ensure stability!)
 
@@ -197,7 +197,7 @@ connections = [
 
 ### Moku:Go (2 slots, 2 I/O)
 - Limited to `Slot1` and `Slot2`
-- Only `IN1`, `IN2`, `OUT1`, `OUT2` available
+- Only `Input1`, `Input2`, `Output1`, `Output2` available
 - Common: Slot 1 = Oscilloscope, Slot 2 = CloudCompile
 
 ### Moku:Lab (2 slots, 2 I/O)
@@ -206,12 +206,12 @@ connections = [
 
 ### Moku:Pro (4 slots, 4 I/O)
 - All 4 slots available
-- `IN1`-`IN4`, `OUT1`-`OUT4` available
+- `Input1`-`Input4`, `Output1`-`Output4` available
 - More complex cross-slot pipelines possible
 
 ### Moku:Delta (3 slots, 8 I/O)
 - 3 slots in standard mode (8-slot advanced mode not covered here)
-- `IN1`-`IN8`, `OUT1`-`OUT8` available
+- `Input1`-`Input8`, `Output1`-`Output8` available
 - Highest bandwidth (5 GHz clock)
 
 **See:** `MOKU_PLATFORM_SPECIFICATIONS.md` for detailed platform specs
@@ -232,8 +232,8 @@ config = MokuConfig(
         2: SlotConfig(instrument='CloudCompile', bitstream='probe.tar')
     },
     routing=[
-        MokuConnection(source='IN1', destination='Slot2InA'),
-        MokuConnection(source='Slot2OutA', destination='OUT1'),
+        MokuConnection(source='Input1', destination='Slot2InA'),
+        MokuConnection(source='Slot2OutA', destination='Output1'),
         MokuConnection(source='Slot2OutB', destination='Slot1InA'),
     ]
 )
@@ -259,9 +259,9 @@ else:
 
 ---
 
-### Error: "Destination port 'OUT1' is not a valid destination for platform"
+### Error: "Destination port 'Output1' is not a valid destination for platform"
 
-**Cause:** Platform doesn't have that many outputs (e.g., Moku:Go only has OUT1-OUT2)
+**Cause:** Platform doesn't have that many outputs (e.g., Moku:Go only has Output1-Output2)
 
 **Fix:** Check platform specs, use valid output numbers
 
@@ -295,10 +295,10 @@ else:
 2. **Use descriptive variable names**
    ```python
    # Good
-   external_input = MokuConnection(source='IN1', destination='Slot2InA')
+   external_input = MokuConnection(source='Input1', destination='Slot2InA')
 
    # Avoid
-   conn1 = MokuConnection(source='IN1', destination='Slot2InA')
+   conn1 = MokuConnection(source='Input1', destination='Slot2InA')
    ```
 
 3. **Validate before deployment**

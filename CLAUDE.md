@@ -50,13 +50,13 @@ Per-slot instrument configuration:
 
 ### `MokuConnection`
 Signal routing between:
-- Physical ports: `IN1`, `IN2`, `OUT1`, `OUT2` (4 max)
+- Physical ports: `Input1`, `Input2`, `Output1`, `Output2` (4 max)
 - Slot virtual ports: `Slot1InA`, `Slot2OutB`, etc.
 
 ### Platform Models
 Physical hardware specifications:
 - `MokuGoPlatform`: 2 slots, 2 analog I/O, 125 MHz
-- `MokuLabPlatform`: 2 slots, 2 analog I/O, 500 MHz (Note: Lab only supports 2 slots despite having 4 I/O)
+- `MokuLabPlatform`: 2 slots, 2 analog I/O, 500 MHz
 - `MokuProPlatform`: 4 slots, 4 analog I/O, 1.25 GHz
 - `MokuDeltaPlatform`: 3 slots, 8 analog I/O, 5 GHz (flagship platform)
 
@@ -105,8 +105,8 @@ config = MokuConfig(
         )
     },
     routing=[
-        MokuConnection(source='IN1', destination='Slot1InA'),
-        MokuConnection(source='Slot1OutA', destination='OUT1'),
+        MokuConnection(source='Input1', destination='Slot1InA'),
+        MokuConnection(source='Slot1OutA', destination='Output1'),
         MokuConnection(source='Slot1OutA', destination='Slot2InA')
     ]
 )
@@ -122,17 +122,14 @@ if errors:
 from moku_models import MOKU_LAB_PLATFORM
 
 config = MokuConfig(
-    platform=MOKU_LAB_PLATFORM,  # 4 slots available
+    platform=MOKU_LAB_PLATFORM,  # 2 slots available
     slots={
         1: SlotConfig(instrument='WaveformGenerator'),
-        2: SlotConfig(instrument='CloudCompile', bitstream='custom.tar'),
-        3: SlotConfig(instrument='Oscilloscope'),
-        4: SlotConfig(instrument='SpectrumAnalyzer')
+        2: SlotConfig(instrument='CloudCompile', bitstream='custom.tar')
     },
     routing=[
         MokuConnection(source='Slot1OutA', destination='Slot2InA'),
-        MokuConnection(source='Slot2OutA', destination='Slot3InA'),
-        MokuConnection(source='Slot2OutB', destination='OUT1')
+        MokuConnection(source='Slot2OutA', destination='Output1')
     ]
 )
 ```
@@ -146,8 +143,8 @@ for platform in [MOKU_GO_PLATFORM, MOKU_LAB_PLATFORM, MOKU_PRO_PLATFORM]:
     print(f"{platform.name}: {platform.slots} slots @ {platform.clock_mhz} MHz")
 
 # Check port specs
-in1 = MOKU_GO_PLATFORM.get_analog_input_by_id('IN1')
-print(f"IN1: {in1.resolution_bits}-bit @ {in1.sample_rate_msa} MSa/s")
+in1 = MOKU_GO_PLATFORM.get_analog_input_by_id('Input1')
+print(f"Input1: {in1.resolution_bits}-bit @ {in1.sample_rate_msa} MSa/s")
 ```
 
 ---
@@ -179,13 +176,13 @@ metadata = TYPE_REGISTRY[voltage_type]
 
 # Get platform DAC output specs
 platform = MOKU_GO_PLATFORM
-dac_output = platform.get_analog_output_by_id('OUT1')
+dac_output = platform.get_analog_output_by_id('Output1')
 # → voltage_range_vpp: 10.0 (±5V)
 
 # Cross-validate: voltage type compatible with platform
 assert metadata.voltage_range == "±5V"
 assert dac_output.voltage_range_vpp == 10.0
-print("✓ VOLTAGE_OUTPUT_05V_S16 compatible with Moku:Go OUT1")
+print("✓ VOLTAGE_OUTPUT_05V_S16 compatible with Moku:Go Output1")
 ```
 
 **Integration point:** forge generator uses both libraries to validate YAML specs against platform hardware constraints.
@@ -200,7 +197,7 @@ from riscure_models import DS1120A_PLATFORM
 
 # Get Moku output specification
 moku = MOKU_GO_PLATFORM
-moku_out = moku.get_analog_output_by_id('OUT1')
+moku_out = moku.get_analog_output_by_id('Output1')
 # → voltage_range_vpp = 10.0 (±5V), can output 0-3.3V in TTL mode
 
 # Get probe input specification
@@ -211,7 +208,7 @@ probe_in = probe.get_port_by_id('digital_glitch')
 # Validate: Moku TTL output (3.3V) within probe input range (0-3.3V)
 ttl_voltage = 3.3
 if probe_in.is_voltage_compatible(ttl_voltage):
-    print("✓ Safe connection: Moku:Go OUT1 (TTL) → DS1120A digital_glitch")
+    print("✓ Safe connection: Moku:Go Output1 (TTL) → DS1120A digital_glitch")
 else:
     print("⚠ Voltage incompatibility detected!")
 ```
