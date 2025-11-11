@@ -5,13 +5,15 @@ Push configuration to Moku device (direct deployment).
 WARNING: Force connects and overwrites existing state without prompts!
 
 Usage:
-    python scripts/push.py <config.yaml> <device-ip>
+    python scripts/push.py <config.yaml> <device-ip> [-b BITSTREAM]
 
 Examples:
     python scripts/push.py deployment.yaml 192.168.1.100
     python scripts/push.py config.json 192.168.1.100
+    python scripts/push.py examples/01-basic.json 192.168.1.100 -b ./my_bitstream.tar
 """
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -64,13 +66,69 @@ def load_config(config_path: Path) -> MokuConfig:
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: python scripts/moku_write.py <config.yaml> <device-ip>")
-        sys.exit(1)
-    
-    config_path = Path(sys.argv[1])
-    device_ip = sys.argv[2]
-    
+    parser = argparse.ArgumentParser(
+        description='Push configuration to Moku device (force connect, overwrites state)',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Simple positional syntax:
+  %(prog)s config.yaml 192.168.1.100
+  %(prog)s examples/01-basic.json 192.168.1.100 -b ./bitstream.tar
+
+  # Flag-based syntax:
+  %(prog)s -c config.yaml -i 192.168.1.100
+  %(prog)s -c examples/01-basic.json -i 192.168.1.100 -b ./bitstream.tar
+        """
+    )
+
+    # Positional arguments (can also use flags)
+    parser.add_argument(
+        'config_file',
+        type=Path,
+        nargs='?',
+        help='Path to configuration file (YAML or JSON)'
+    )
+    parser.add_argument(
+        'device_ip',
+        type=str,
+        nargs='?',
+        help='Device IP address (e.g., 192.168.1.100)'
+    )
+
+    # Optional flag-based arguments
+    parser.add_argument(
+        '-c', '--config',
+        type=Path,
+        dest='config_flag',
+        help='Config file (alternative to positional argument)'
+    )
+    parser.add_argument(
+        '-i', '--ip',
+        type=str,
+        dest='ip_flag',
+        help='Device IP (alternative to positional argument)'
+    )
+    parser.add_argument(
+        '-b', '--bitstream',
+        type=Path,
+        default=None,
+        help='Override bitstream path (replaces path in config)'
+    )
+
+    args = parser.parse_args()
+
+    # Determine config path (flag takes precedence over positional)
+    config_path = args.config_flag if args.config_flag else args.config_file
+    if not config_path:
+        parser.error("Config file required (provide as positional arg or use -c)")
+
+    # Determine device IP (flag takes precedence over positional)
+    device_ip = args.ip_flag if args.ip_flag else args.device_ip
+    if not device_ip:
+        parser.error("Device IP required (provide as positional arg or use -i)")
+
+    bitstream_override = args.bitstream
+
     if not config_path.exists():
         print(f"Error: Config file not found: {config_path}")
         sys.exit(1)
@@ -102,23 +160,33 @@ def main():
     try:
         # Deploy instruments
         print("\nDeploying instruments...")
+        deployed_slots = set()  # Track which slots were successfully deployed
         for slot_num, slot_config in config.slots.items():
             if slot_config.instrument == 'CloudCompile':
-                if not slot_config.bitstream:
-                    print(f"  Slot {slot_num}: No bitstream, skipping")
+                # Determine bitstream path (override or config)
+                if bitstream_override:
+                    bitstream_path = bitstream_override
+                    print(f"  Using override bitstream: {bitstream_path}")
+                elif slot_config.bitstream:
+                    bitstream_path = Path(slot_config.bitstream)
+                else:
+                    print(f"  Slot {slot_num}: CloudCompile (no bitstream specified, skipping)")
                     continue
-                
+
                 # Resolve bitstream path (relative to project root or absolute)
-                bitstream_path = Path(slot_config.bitstream)
                 if not bitstream_path.is_absolute():
                     bitstream_path = PROJECT_ROOT / bitstream_path
-                
+
+                # Check if bitstream exists (skip if placeholder path)
                 if not bitstream_path.exists():
-                    print(f"  ✗ Error: Bitstream not found at {bitstream_path}")
-                    raise FileNotFoundError(f"Bitstream package not found at {bitstream_path}")
+                    print(f"  Slot {slot_num}: CloudCompile")
+                    print(f"    ⚠ Warning: Bitstream not found: {bitstream_path}")
+                    print(f"    ℹ Skipping CloudCompile deployment (use -b to provide bitstream)")
+                    continue
                 
                 print(f"  Slot {slot_num}: CloudCompile ({bitstream_path.name})")
                 cc = moku.set_instrument(slot_num, CloudCompile, bitstream=str(bitstream_path))
+                deployed_slots.add(slot_num)
                 
                 # Apply control registers if specified
                 if slot_config.control_registers:
@@ -131,6 +199,7 @@ def main():
             elif slot_config.instrument == 'Oscilloscope':
                 print(f"  Slot {slot_num}: Oscilloscope")
                 osc = moku.set_instrument(slot_num, Oscilloscope)
+                deployed_slots.add(slot_num)
                 
                 # Configure frontend (input channels)
                 if slot_config.settings:
@@ -197,16 +266,40 @@ def main():
             else:
                 print(f"  Slot {slot_num}: {slot_config.instrument} (not implemented, skipping)")
         
-        # Configure routing
+        # Configure routing (filter out connections to non-deployed slots)
         if config.routing:
             print("\nConfiguring routing...")
-            # Port names are automatically normalized by MokuConnection validator
-            connections = [
-                {'source': conn.source, 'destination': conn.destination}
-                for conn in config.routing
-            ]
-            moku.set_connections(connections)
-            print(f"  ✓ {len(connections)} connections")
+
+            # Helper to check if a port references a deployed slot
+            def is_port_available(port_name: str) -> bool:
+                # Physical ports are always available
+                if port_name.startswith(('Input', 'Output')):
+                    return True
+                # Slot ports - check if slot was deployed
+                if port_name.startswith('Slot'):
+                    slot_num = int(port_name[4])  # Extract slot number
+                    return slot_num in deployed_slots
+                return True
+
+            # Filter routing to only include connections with deployed endpoints
+            valid_connections = []
+            skipped_connections = []
+            for conn in config.routing:
+                if is_port_available(conn.source) and is_port_available(conn.destination):
+                    valid_connections.append({'source': conn.source, 'destination': conn.destination})
+                else:
+                    skipped_connections.append(f"{conn.source} → {conn.destination}")
+
+            if skipped_connections:
+                print(f"  ℹ Skipping {len(skipped_connections)} connection(s) (slots not deployed):")
+                for skipped in skipped_connections:
+                    print(f"    - {skipped}")
+
+            if valid_connections:
+                moku.set_connections(valid_connections)
+                print(f"  ✓ {len(valid_connections)} connections configured")
+            else:
+                print(f"  ℹ No valid connections to configure")
         
         print("\n✓ Deployment complete")
     
