@@ -2,31 +2,6 @@
 
 Pydantic models for Moku device deployment and configuration. Define hardware specs once, use everywhere: deployment scripts, validation, simulation.
 
-## Project Structure
-
-```
-moku-models-v4/
-├── moku_models/              # Core Pydantic library
-│   ├── platforms/            # Platform definitions (Go, Lab, Pro, Delta)
-│   ├── device/               # Device operations (pull/push)
-│   ├── moku_config.py        # MokuConfig, SlotConfig
-│   ├── routing.py            # MokuConnection, routing validation
-│   ├── validation.py         # Shared validation utilities
-│   └── discovery.py          # Device discovery models
-├── examples/                 # Reference configurations (JSON + docs)
-│   ├── 01-basic-cloudcompile.json
-│   ├── 02-dual-monitoring.json
-│   ├── 03-full-io-utilization.json
-│   └── 04-with-waveform-gen.json
-├── scripts/                  # CLI tools
-│   ├── pull.py               # Read config from device
-│   ├── push.py               # Deploy config to device
-│   ├── validate_moku_config.py
-│   └── diagnose_moku_env.py
-├── docs/                     # Specifications and patterns
-├── datasheets/               # Hardware PDFs
-└── README.md
-```
 
 ## Quick Start
 
@@ -78,6 +53,32 @@ pip install -e ".[device]"  # Adds moku + pyyaml
 - **DETAILS.md** - Architecture and integration guide
 - **llms.txt** - LLM quick reference
 - **docs/MOKU_PLATFORM_SPECIFICATIONS.md** - Hardware specifications
+
+## Project Structure
+
+```
+moku-models-v4/
+├── moku_models/              # Core Pydantic library
+│   ├── platforms/            # Platform definitions (Go, Lab, Pro, Delta)
+│   ├── device/               # Device operations (pull/push)
+│   ├── moku_config.py        # MokuConfig, SlotConfig
+│   ├── routing.py            # MokuConnection, routing validation
+│   ├── validation.py         # Shared validation utilities
+│   └── discovery.py          # Device discovery models
+├── examples/                 # Reference configurations (JSON + docs)
+│   ├── 01-basic-cloudcompile.json
+│   ├── 02-dual-monitoring.json
+│   ├── 03-full-io-utilization.json
+│   └── 04-with-waveform-gen.json
+├── scripts/                  # CLI tools
+│   ├── pull.py               # Read config from device
+│   ├── push.py               # Deploy config to device
+│   ├── validate_moku_config.py
+│   └── diagnose_moku_env.py
+├── docs/                     # Specifications and patterns
+├── datasheets/               # Hardware PDFs
+└── README.md
+```
 
 ## License
 
