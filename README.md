@@ -8,34 +8,46 @@ Pydantic models for Moku device deployment and configuration. Define hardware sp
 
 ## Quick Start
 
-### Pull Config from Device
+### Pull Configuration from Device
 
 ```bash
-# CLI
-python scripts/pull.py --ip 192.168.1.100 --output config.json --validate
+# Level 1: Basic info (instruments, routing) - non-invasive
+python scripts/pull.py 192.168.1.100
 
-# Python API
-from moku_models import pull_config
+# Level 2: Detailed settings (frontend, control registers, DIO)
+python scripts/pull.py 192.168.1.100 --level 2
 
-config = pull_config(ip='192.168.1.100', save_to='config.json')
-print(f"Platform: {config['device_info']['platform']}")
-print(f"Slots: {list(config['slots'].keys())}")
+# Level 3: Force connect, maximum detail
+python scripts/pull.py 192.168.1.100 --level 3 --force
+
+# Custom output file
+python scripts/pull.py 192.168.1.100 -o my_config.json
+
+# Write to stdout (for piping)
+python scripts/pull.py 192.168.1.100 --output -
 ```
 
-### Push Config to Device
+**Features:**
+- **Progressive escalation** (polite → detailed → maximum)
+- **Platform auto-detection** (Go, Lab, Pro, Delta)
+- **Control register introspection** (CloudCompile CR0-CR31)
+- **Frontend/output settings** (Oscilloscope)
+- **DIO configuration** (Go/Delta platforms)
+
+### Push Configuration to Device
 
 ```bash
-# CLI (validates before pushing)
-python scripts/push.py --ip 192.168.1.100 --config deployment.json
-
-# Python API
-from moku_models import MokuConfig, push_config
-
-with open('config.json') as f:
-    config = MokuConfig.model_validate_json(f.read())
-
-push_config(ip='192.168.1.100', config=config, overwrite=True)
+# Deploy from YAML or JSON (force connect, overwrites state)
+python scripts/push.py config.yaml 192.168.1.100
+python scripts/push.py curr_model.json 192.168.1.100
 ```
+
+**WARNING:** Force connects and overwrites existing state without prompts!
+
+**Features:**
+- Force connect (disconnects existing sessions)
+- Direct deployment (no safety checks)
+- Supports YAML and JSON formats
 
 ### Validate Config Files
 
@@ -44,6 +56,20 @@ push_config(ip='192.168.1.100', config=config, overwrite=True)
 python scripts/validate_moku_config.py deployment.yaml
 python scripts/validate_moku_config.py config.json --verbose
 ```
+
+### Diagnose Environment
+
+```bash
+# Automatic environment troubleshooting
+python scripts/diagnose_moku_env.py
+```
+
+**Checks:**
+- UV package manager installation
+- Virtual environment setup
+- Moku package installation
+- Git submodules (if in monorepo)
+- Import tests
 
 ## Installation
 
@@ -108,8 +134,9 @@ moku_models/
 └── discovery.py        # Device discovery models
 
 scripts/
-├── pull.py             # Pull config from device CLI
-├── push.py             # Push config to device CLI
+├── pull.py             # Progressive device introspection (Level 1/2/3)
+├── push.py             # Direct deployment (force mode, no safety checks)
+├── diagnose_moku_env.py   # Environment diagnostics
 └── validate_moku_config.py  # Validate YAML/JSON files
 ```
 
