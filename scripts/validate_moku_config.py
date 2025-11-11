@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
 """
-Validate MokuConfig YAML files against Pydantic models.
+Validate MokuConfig YAML/JSON files against Pydantic models.
 
 Usage:
-    # From monorepo root (Tier 2: Integration Testing)
-    uv run python libs/moku-models/scripts/validate_moku_config.py deployment.yaml
+    # Validate YAML file
+    uv run python scripts/validate_moku_config.py deployment.yaml
 
-    # From submodule directory (Tier 1: Component Testing)
-    cd libs/moku-models
-    uv run python scripts/validate_moku_config.py ../../deployment.yaml
+    # Validate JSON file
+    uv run python scripts/validate_moku_config.py config.json
+
+    # With verbose output
+    uv run python scripts/validate_moku_config.py deployment.yaml --verbose
+
+Supported Formats:
+    - YAML (.yaml, .yml)
+    - JSON (.json)
 
 Cascading pyproject.toml Strategy:
     This script works with the monorepo's two-tier testing strategy:
 
     - Tier 1 (Component): Run from libs/moku-models/ with minimal dependencies
-      (pydantic only, fastest installation)
+      (pydantic + pyyaml, fastest installation)
 
     - Tier 2 (Integration): Run from monorepo root with full workspace
       (all workspace members available for cross-library validation)
@@ -23,74 +29,50 @@ Cascading pyproject.toml Strategy:
 """
 
 import sys
+import argparse
 from pathlib import Path
-import yaml
-from moku_models import MokuConfig, MOKU_GO_PLATFORM
 
+# Add parent directory to path for local imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-def validate_config(yaml_path: Path) -> tuple[bool, str]:
-    """
-    Validate a MokuConfig YAML file.
-
-    Returns:
-        (success: bool, message: str)
-    """
-    try:
-        # Load YAML
-        with open(yaml_path) as f:
-            data = yaml.safe_load(f)
-
-        # Fix platform reference (YAML has string, model expects object)
-        if 'platform' in data and isinstance(data['platform'], str):
-            platform_name = data['platform']
-            if platform_name == 'moku_go':
-                data['platform'] = MOKU_GO_PLATFORM
-            else:
-                return False, f"Unknown platform: {platform_name}"
-
-        # Remove non-Pydantic fields
-        non_model_fields = ['description', 'physical_connections']
-        for field in non_model_fields:
-            if field in data:
-                del data[field]
-
-        # Remove description from slots
-        if 'slots' in data:
-            for slot_config in data['slots'].values():
-                if 'description' in slot_config:
-                    del slot_config['description']
-
-        # Remove description from routing
-        if 'routing' in data:
-            for route in data['routing']:
-                if 'description' in route:
-                    del route['description']
-
-        # Validate with Pydantic
-        config = MokuConfig.from_dict(data)
-
-        # Run routing validation
-        routing_errors = config.validate_routing()
-        if routing_errors:
-            return False, f"Routing validation failed:\n" + "\n".join(f"  - {err}" for err in routing_errors)
-
-        return True, f"✓ Valid MokuConfig: {config.platform.name}, {len(config.slots)} slots, {len(config.routing)} routes"
-
-    except Exception as e:
-        return False, f"✗ Validation failed: {e}"
+from moku_models import load_and_validate_config
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python scripts/validate_moku_config.py path/to/config.yaml")
+    parser = argparse.ArgumentParser(
+        description='Validate MokuConfig YAML/JSON files',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s deployment.yaml
+  %(prog)s config.json
+  %(prog)s deployment.yaml --verbose
+        """
+    )
+
+    parser.add_argument(
+        'config_file',
+        type=Path,
+        help='Path to config file (YAML or JSON)'
+    )
+    parser.add_argument(
+        '--verbose', '-v',
+        action='store_true',
+        help='Show detailed validation warnings'
+    )
+
+    args = parser.parse_args()
+
+    if not args.config_file.exists():
+        print(f"Error: File not found: {args.config_file}")
         sys.exit(1)
 
-    yaml_path = Path(sys.argv[1])
-    if not yaml_path.exists():
-        print(f"Error: File not found: {yaml_path}")
-        sys.exit(1)
+    # Use shared validation logic
+    success, message, _ = load_and_validate_config(
+        args.config_file,
+        verbose=args.verbose
+    )
 
-    success, message = validate_config(yaml_path)
     print(message)
     sys.exit(0 if success else 1)
 

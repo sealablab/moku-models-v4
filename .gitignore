@@ -42,3 +42,6 @@ htmlcov/
 .DS_Store
 Thumbs.db
 uv.lock
+
+# Claude Code
+.claude/
