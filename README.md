@@ -113,13 +113,9 @@ scripts/
 └── validate_moku_config.py  # Validate YAML/JSON files
 ```
 
-## Contributing
 
 This is a standalone library used by:
-- [moku-instrument-forge](https://github.com/sealablab/moku-instrument-forge) - FPGA code generation
 - [forge-v4-workspace](https://github.com/sealablab/forge-v4) - Development environment
-
-See [CLAUDE.md](https://github.com/sealablab/moku-models-v4/blob/main/CLAUDE.md) for integration patterns.
 
 ## License
 
