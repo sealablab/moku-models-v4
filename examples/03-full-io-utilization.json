@@ -1,0 +1,54 @@
+{
+  "platform": "moku_go",
+  "slots": {
+    "1": {
+      "instrument": "Oscilloscope",
+      "settings": {
+        "sample_rate": 125000000
+      }
+    },
+    "2": {
+      "instrument": "CloudCompile",
+      "bitstream": "./path/to/custom_instrument.tar",
+      "control_registers": {
+        "0": 0,
+        "1": 0,
+        "2": 3300,
+        "3": 100,
+        "4": 1650,
+        "5": 200
+      }
+    }
+  },
+  "routing": [
+    {
+      "source": "Input1",
+      "destination": "Slot2InA"
+    },
+    {
+      "source": "Input2",
+      "destination": "Slot2InB"
+    },
+    {
+      "source": "Slot2OutA",
+      "destination": "Output1"
+    },
+    {
+      "source": "Slot2OutB",
+      "destination": "Output2"
+    },
+    {
+      "source": "Slot2OutC",
+      "destination": "Slot1InA"
+    },
+    {
+      "source": "Input2",
+      "destination": "Slot1InB"
+    }
+  ],
+  "metadata": {
+    "name": "Full I/O Utilization",
+    "description": "Use all Moku:Go I/O ports (2 inputs, 2 outputs) with monitoring",
+    "version": "1.0.0"
+  }
+}

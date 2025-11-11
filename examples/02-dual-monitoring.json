@@ -1,0 +1,50 @@
+{
+  "platform": "moku_go",
+  "slots": {
+    "1": {
+      "instrument": "Oscilloscope",
+      "settings": {
+        "sample_rate": 125000000
+      }
+    },
+    "2": {
+      "instrument": "CloudCompile",
+      "bitstream": "./path/to/custom_instrument.tar",
+      "control_registers": {
+        "0": 0,
+        "1": 0,
+        "2": 3300,
+        "3": 100,
+        "4": 1650,
+        "5": 200
+      }
+    }
+  },
+  "routing": [
+    {
+      "source": "Input1",
+      "destination": "Slot2InA"
+    },
+    {
+      "source": "Slot2OutA",
+      "destination": "Output1"
+    },
+    {
+      "source": "Slot2OutB",
+      "destination": "Output2"
+    },
+    {
+      "source": "Slot2OutA",
+      "destination": "Slot1InA"
+    },
+    {
+      "source": "Slot2OutB",
+      "destination": "Slot1InB"
+    }
+  ],
+  "metadata": {
+    "name": "Dual Output Monitoring",
+    "description": "Monitor two CloudCompile outputs on both Oscilloscope channels",
+    "version": "1.0.0"
+  }
+}

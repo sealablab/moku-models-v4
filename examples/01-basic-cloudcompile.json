@@ -1,0 +1,40 @@
+{
+  "platform": "moku_go",
+  "slots": {
+    "1": {
+      "instrument": "Oscilloscope",
+      "settings": {
+        "sample_rate": 125000000
+      }
+    },
+    "2": {
+      "instrument": "CloudCompile",
+      "bitstream": "./path/to/custom_instrument.tar",
+      "control_registers": {
+        "0": 0,
+        "1": 0,
+        "2": 3300,
+        "3": 100
+      }
+    }
+  },
+  "routing": [
+    {
+      "source": "Input1",
+      "destination": "Slot2InA"
+    },
+    {
+      "source": "Slot2OutA",
+      "destination": "Output1"
+    },
+    {
+      "source": "Slot2OutC",
+      "destination": "Slot1InA"
+    }
+  ],
+  "metadata": {
+    "name": "Basic CloudCompile",
+    "description": "Minimal working example: single input/output with monitoring",
+    "version": "1.0.0"
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "platform": "moku_go",
+  "slots": {
+    "1": {
+      "instrument": "Oscilloscope",
+      "settings": {
+        "sample_rate": 125000000
+      },
+      "waveform_output": {
+        "channel": 1,
+        "enable": true,
+        "waveform_type": "Square",
+        "frequency": 1000,
+        "amplitude": 2.5,
+        "offset": 1.25,
+        "duty": 50
+      }
+    },
+    "2": {
+      "instrument": "CloudCompile",
+      "bitstream": "./path/to/custom_instrument.tar",
+      "control_registers": {
+        "0": 0,
+        "1": 0,
+        "2": 3300,
+        "3": 100
+      }
+    }
+  },
+  "routing": [
+    {
+      "source": "Slot1OutA",
+      "destination": "Slot2InA"
+    },
+    {
+      "source": "Slot2OutA",
+      "destination": "Output1"
+    },
+    {
+      "source": "Slot2OutC",
+      "destination": "Slot1InA"
+    }
+  ],
+  "metadata": {
+    "name": "CloudCompile with Waveform Generator",
+    "description": "Oscilloscope generates test signal for CloudCompile processing",
+    "version": "1.0.0"
+  }
+}
