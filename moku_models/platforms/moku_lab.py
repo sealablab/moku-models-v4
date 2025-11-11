@@ -24,7 +24,7 @@ class AnalogPort(BaseModel):
     Physical analog I/O port (BNC connector).
 
     Attributes:
-        port_id: Port identifier (e.g., 'IN1', 'OUT1')
+        port_id: Port identifier (e.g., 'Input1', 'Output1')
         connector_type: Physical connector (always 'BNC' for Moku:Lab)
         direction: Signal direction
         resolution_bits: ADC/DAC bit depth
@@ -32,7 +32,7 @@ class AnalogPort(BaseModel):
         voltage_range_vpp: Peak-to-peak voltage range
         impedance: Input impedance
     """
-    port_id: str = Field(..., description="Port identifier (e.g., 'IN1', 'OUT1')")
+    port_id: str = Field(..., description="Port identifier (e.g., 'Input1', 'Output1')")
     connector_type: Literal['BNC'] = Field(default='BNC', description="Physical connector type")
     direction: Literal['input', 'output'] = Field(..., description="Signal direction")
     resolution_bits: int = Field(..., description="ADC/DAC bit depth")
@@ -109,7 +109,7 @@ class MokuLabPlatform(BaseModel):
     analog_inputs: list[AnalogPort] = Field(
         default_factory=lambda: [
             AnalogPort(
-                port_id='IN1',
+                port_id='Input1',
                 direction='input',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -117,7 +117,7 @@ class MokuLabPlatform(BaseModel):
                 impedance='1MOhm'
             ),
             AnalogPort(
-                port_id='IN2',
+                port_id='Input2',
                 direction='input',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -125,7 +125,7 @@ class MokuLabPlatform(BaseModel):
                 impedance='1MOhm'
             ),
             AnalogPort(
-                port_id='IN3',
+                port_id='Input3',
                 direction='input',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -133,7 +133,7 @@ class MokuLabPlatform(BaseModel):
                 impedance='1MOhm'
             ),
             AnalogPort(
-                port_id='IN4',
+                port_id='Input4',
                 direction='input',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -147,7 +147,7 @@ class MokuLabPlatform(BaseModel):
     analog_outputs: list[AnalogPort] = Field(
         default_factory=lambda: [
             AnalogPort(
-                port_id='OUT1',
+                port_id='Output1',
                 direction='output',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -155,7 +155,7 @@ class MokuLabPlatform(BaseModel):
                 impedance='50Ohm'
             ),
             AnalogPort(
-                port_id='OUT2',
+                port_id='Output2',
                 direction='output',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -163,7 +163,7 @@ class MokuLabPlatform(BaseModel):
                 impedance='50Ohm'
             ),
             AnalogPort(
-                port_id='OUT3',
+                port_id='Output3',
                 direction='output',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -171,7 +171,7 @@ class MokuLabPlatform(BaseModel):
                 impedance='50Ohm'
             ),
             AnalogPort(
-                port_id='OUT4',
+                port_id='Output4',
                 direction='output',
                 resolution_bits=16,
                 sample_rate_msa=500,
@@ -197,11 +197,11 @@ class MokuLabPlatform(BaseModel):
         return 1000.0 / self.clock_mhz
 
     def get_analog_input_by_id(self, port_id: str) -> AnalogPort | None:
-        """Get analog input port by ID (e.g., 'IN1')."""
+        """Get analog input port by ID (e.g., 'Input1')."""
         return next((p for p in self.analog_inputs if p.port_id == port_id), None)
 
     def get_analog_output_by_id(self, port_id: str) -> AnalogPort | None:
-        """Get analog output port by ID (e.g., 'OUT1')."""
+        """Get analog output port by ID (e.g., 'Output1')."""
         return next((p for p in self.analog_outputs if p.port_id == port_id), None)
 
     def __str__(self) -> str:
