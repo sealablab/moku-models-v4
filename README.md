@@ -1,10 +1,6 @@
 # moku-models
 
-[![GitHub](https://img.shields.io/badge/github-sealablab%2Fmoku--models--v4-blue)](https://github.com/sealablab/moku-models-v4)
-
 Pydantic models for Moku device deployment and configuration. Define hardware specs once, use everywhere: deployment scripts, validation, simulation.
-
-**Repository:** https://github.com/sealablab/moku-models-v4
 
 ## Quick Start
 
@@ -118,9 +114,9 @@ if not errors:
 
 ## Documentation
 
-- **[CLAUDE.md](https://github.com/sealablab/moku-models-v4/blob/main/CLAUDE.md)** - Architecture and integration guide
-- **[llms.txt](https://github.com/sealablab/moku-models-v4/blob/main/llms.txt)** - LLM quick reference
-- **[Platform Specs](https://github.com/sealablab/moku-models-v4/blob/main/docs/MOKU_PLATFORM_SPECIFICATIONS.md)** - Detailed hardware specifications
+- **DETAILS.md** - Architecture and integration guide
+- **llms.txt** - LLM quick reference
+- **docs/MOKU_PLATFORM_SPECIFICATIONS.md** - Detailed hardware specifications
 
 ## Project Structure
 
@@ -141,8 +137,7 @@ scripts/
 ```
 
 
-This is a standalone library used by:
-- [forge-v4-workspace](https://github.com/sealablab/forge-v4) - Development environment
+This is a standalone Pydantic library for Moku device configuration and deployment.
 
 ## License
 

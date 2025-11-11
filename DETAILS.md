@@ -9,9 +9,6 @@
 - **CocotB Simulation**: Behavioral instrument models in test environments
 - **YAML Configuration**: Human-friendly deployment specs
 
-**Part of:** [moku-instrument-forge-mono-repo](https://github.com/sealablab/moku-instrument-forge-mono-repo) (monorepo orchestrator)
-**Used by:** [moku-instrument-forge](https://github.com/sealablab/moku-instrument-forge) (forge code generation)
-
 **Platform Specifications**: See `docs/MOKU_PLATFORM_SPECIFICATIONS.md` for detailed hardware specs and datasheet references
 
 ---
@@ -209,66 +206,6 @@ push_config_to_device(config, '192.168.1.100')
 
 ---
 
-## Integration with Sibling Libraries
-
-### With basic-app-datatypes
-
-**Use case:** Platform-aware voltage type validation
-
-```python
-from basic_app_datatypes import BasicAppDataTypes, TYPE_REGISTRY
-from moku_models import MOKU_GO_PLATFORM
-
-# Get type metadata
-voltage_type = BasicAppDataTypes.VOLTAGE_OUTPUT_05V_S16
-metadata = TYPE_REGISTRY[voltage_type]
-# → voltage_range: "±5V"
-
-# Get platform DAC output specs
-platform = MOKU_GO_PLATFORM
-dac_output = platform.get_analog_output_by_id('OUT1')
-# → voltage_range_vpp: 10.0 (±5V)
-
-# Cross-validate: voltage type compatible with platform
-assert metadata.voltage_range == "±5V"
-assert dac_output.voltage_range_vpp == 10.0
-print("✓ VOLTAGE_OUTPUT_05V_S16 compatible with Moku:Go OUT1")
-```
-
-**Integration point:** forge generator uses both libraries to validate YAML specs against platform hardware constraints.
-
-### With riscure-models
-
-**Use case:** Probe input voltage safety validation
-
-```python
-from moku_models import MOKU_GO_PLATFORM
-from riscure_models import DS1120A_PLATFORM
-
-# Get Moku output specification
-moku = MOKU_GO_PLATFORM
-moku_out = moku.get_analog_output_by_id('OUT1')
-# → voltage_range_vpp = 10.0 (±5V), can output 0-3.3V in TTL mode
-
-# Get probe input specification
-probe = DS1120A_PLATFORM
-probe_in = probe.get_port_by_id('digital_glitch')
-# → voltage_min=0V, voltage_max=3.3V (TTL input)
-
-# Validate: Moku TTL output (3.3V) within probe input range (0-3.3V)
-ttl_voltage = 3.3
-if probe_in.is_voltage_compatible(ttl_voltage):
-    print("✓ Safe connection: Moku:Go OUT1 (TTL) → DS1120A digital_glitch")
-else:
-    print("⚠ Voltage incompatibility detected!")
-```
-
-**Integration point:** Deployment validation checks voltage safety before suggesting physical wire connections.
-
-**Safety principle:** Always validate Moku output voltages against probe input limits to prevent hardware damage.
-
----
-
 ## Common Tasks
 
 ### Add New Platform
@@ -297,20 +234,15 @@ config = MokuConfig.from_dict(data)
 
 ### Validate Configuration File
 ```bash
-# From component directory (Tier 1 - recommended)
-cd libs/moku-models
-uv run python scripts/validate_moku_config.py deployment.yaml
-
-# From monorepo root (Tier 2 - integration testing)
-cd ../..
-uv run python libs/moku-models/scripts/validate_moku_config.py deployment.yaml
+# Validate any YAML or JSON configuration file
+uv run python scripts/validate_moku_config.py config.yaml
 ```
 
 ---
 
-## Integration with forge Code Generation
+## Integration Examples
 
-**Import in forge generators and parent monorepo:**
+**Import in code generators:**
 ```python
 from moku_models import MokuConfig, MOKU_GO_PLATFORM
 ```
@@ -319,22 +251,7 @@ from moku_models import MokuConfig, MOKU_GO_PLATFORM
 - VHDL build scripts query platform specs (clock frequency, I/O count)
 - CocotB tests import `MokuConfig` for behavioral models
 - Python TUI apps use `MokuConnection` for routing visualization
-- forge code generation uses platform specs for validation
-
-**Git Submodule Workflow:**
-```bash
-# From forge/libs/moku-models (nested submodule)
-cd forge/libs/moku-models/
-git checkout -b add-feature
-# Make changes
-git commit -m "Add feature"
-git push origin add-feature
-
-# Update parent forge to use new commit
-cd ../..
-git add libs/moku-models/
-git commit -m "Update moku-models submodule"
-```
+- Code generation uses platform specs for validation
 
 ---
 

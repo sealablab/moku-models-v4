@@ -106,9 +106,8 @@ errors = config.validate_routing()
 
 **Validate YAML config files:**
 ```bash
-# Recommended: Tier 1 (Component Testing - minimal deps, faster)
-cd libs/moku-models
-uv run python scripts/validate_moku_config.py ../../deployment.yaml
+# Validate any YAML or JSON configuration file
+uv run python scripts/validate_moku_config.py config.yaml
 # ✓ Only installs pydantic + pyyaml (~1ms, 2 packages)
 
 # Script handles:
@@ -117,19 +116,10 @@ uv run python scripts/validate_moku_config.py ../../deployment.yaml
 # - Full Pydantic validation + routing checks
 ```
 
-**Cascading pyproject.toml Strategy:**
-This library uses the monorepo's two-tier testing approach:
-- **Tier 1 (Component)**: Run from `libs/moku-models/` with minimal deps (recommended for validation)
-- **Tier 2 (Integration)**: Run from monorepo root with full workspace (for cross-library testing)
-
-Validation is a component-level operation (no cross-library deps needed), so Tier 1 is preferred.
-
-See: `Obsidian/Project/Review/CASCADING_PYPROJECT_STRATEGY.md` for complete rationale
-
 ## Documentation
 
 - **README.md** - Installation and basic usage
-- **CLAUDE.md** - AI assistant context and development guidelines
+- **DETAILS.md** - AI assistant context and development guidelines
 - **docs/MOKU_PLATFORM_SPECIFICATIONS.md** - Detailed hardware specs from datasheets
 - **docs/routing_patterns.md** - Common MCC routing patterns and best practices
 - **datasheets/** - Official Liquid Instruments PDFs
@@ -171,10 +161,6 @@ scripts/
 
 **Used by:** moku-instrument-forge (deployment), CocotB testbenches (simulation), deployment automation tools
 
-**Works with:**
-- [basic-app-datatypes](https://github.com/sealablab/basic-app-datatypes) (sibling library) - Voltage type validation
-- [riscure-models](https://github.com/sealablab/riscure-models) (sibling library) - Cross-platform voltage safety
-
 **Validation flow:** MokuConfig → validate platform specs → validate routing → deployment-ready
 
 ## For More Details
@@ -195,5 +181,3 @@ scripts/
 **Version:** Current
 **Last Updated:** 2025-11-04
 **License:** MIT
-**Part of:** [moku-instrument-forge-mono-repo](https://github.com/sealablab/moku-instrument-forge-mono-repo) (monorepo orchestrator)
-**Used by:** [moku-instrument-forge](https://github.com/sealablab/moku-instrument-forge) (forge code generation)

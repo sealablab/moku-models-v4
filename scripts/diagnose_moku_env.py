@@ -87,7 +87,6 @@ def check_uv_available():
         print_error("UV not found in PATH")
         print("\n📋 Quick Fix:")
         print("   Install uv: curl -LsSf https://astral.sh/uv/install.sh | sh")
-        print("   Or see: https://github.com/astral-sh/uv")
         return False
 
 
