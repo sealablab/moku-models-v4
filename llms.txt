@@ -179,14 +179,14 @@ scripts/
 
 ## For More Details
 
-**Deep context:** See [CLAUDE.md](CLAUDE.md) for:
-- Complete platform specifications from datasheets
-- Routing patterns and constraints
-- Integration with sibling libraries
-- Development workflow
-- Instrument configuration patterns
+**Deep context:** See [DETAILS.md](DETAILS.md) for:
+- Complete platform specifications and design rationale
+- Integration patterns with sibling libraries
+- Usage examples and common workflows
+- Development workflow for adding platforms
+- Routing validation patterns
 
-**API documentation:** See [README.md](README.md) for installation
+**Installation:** See [README.md](README.md)
 
 **Datasheets:** See [datasheets/](datasheets/) for official Liquid Instruments PDFs
 
