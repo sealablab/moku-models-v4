@@ -21,12 +21,12 @@ python scripts/validate_moku_config.py pulled_config.json
 **WARNING:** `push.py` force-connects and overwrites existing device state!
 
 ### Available Examples
-- `01-basic-cloudcompile.json` - Minimal setup (3 routes)
-- `02-dual-monitoring.json` - Dual output monitoring (5 routes)
-- `03-full-io-utilization.json` - All I/O ports used (6 routes)
-- `04-with-waveform-gen.json` - Self-test with signal generator
+- [01-basic-cloudcompile](https://github.com/sealablab/moku-models-v4/blob/main/examples/01-basic-cloudcompile.md) - Minimal setup (3 routes)
+- [02-dual-monitoring](https://github.com/sealablab/moku-models-v4/blob/main/examples/02-dual-monitoring.md) - Dual output monitoring (5 routes)
+- [03-full-io-utilization](https://github.com/sealablab/moku-models-v4/blob/main/examples/03-full-io-utilization.md) - All I/O ports used (6 routes)
+- [04-with-waveform-gen](https://github.com/sealablab/moku-models-v4/blob/main/examples/04-with-waveform-gen.md) - Self-test with signal generator
 
-See `examples/README.md` for detailed documentation.
+See [examples/README.md](https://github.com/sealablab/moku-models-v4/blob/main/examples/README.md) for detailed documentation.
 
 ## Installation
 
