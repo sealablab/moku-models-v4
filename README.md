@@ -12,7 +12,7 @@ Pydantic models for Moku device deployment and configuration. Define hardware sp
 python scripts/push.py examples/01-basic-cloudcompile.json 192.168.1.100
 
 # Pull the configuration back to verify
-python scripts/pull.py 192.168.1.100 -o pulled_config.json
+python scripts/pull.py 192.168.1.100 --output pulled_config.json
 
 # Validate any configuration file
 python scripts/validate_moku_config.py pulled_config.json
